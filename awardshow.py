@@ -14,9 +14,8 @@ def person_search(text):
 	import nltk
 	sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
 	sentences = sent_detector.tokenize(text)
-	tokens = []
-	tags = []
 	entities = []
+	stoplist = ["Golden Globes"]
 	for sentence in sentences:
 		temp = nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(sentence)))
 		for entity in temp:
@@ -27,7 +26,10 @@ def person_search(text):
 			else:
 				if (nodeLabel=='PERSON' and len(entity)==2):
 					person = entity[0][0]+" "+entity[1][0]
-					entities.append(person)
+					if (person in stoplist):
+						pass
+					else:
+						entities.append(person)
 	return entities
 
 def looped_search(tweets):
@@ -36,5 +38,5 @@ def looped_search(tweets):
 	for tweet in tweets:
 		temp = person_search(tweet['text'])
 		if temp!=[]:
-			people.append(temp)
+			people.extend(temp)
 	return people
