@@ -13,9 +13,12 @@ def person_search(text):
 	"Takes a piece of text, pulling out people names"
 	import nltk
 	sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
+	namecorpus = nltk.corpus.names
+	names = namecorpus.words('male.txt')
+	names.extend(namecorpus.words('female.txt'))
 	sentences = sent_detector.tokenize(text)
 	entities = []
-	stoplist = ["Golden Globes"]
+	stoplist = ["Justin REALLY", "Clinton Endorses"]
 	for sentence in sentences:
 		temp = nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(sentence)))
 		for entity in temp:
@@ -24,7 +27,7 @@ def person_search(text):
 			except AttributeError:
 				pass
 			else:
-				if (nodeLabel=='PERSON' and len(entity)==2):
+				if (nodeLabel=='PERSON' and len(entity)==2 and entity[0][0] in names):
 					person = entity[0][0]+" "+entity[1][0]
 					if (person in stoplist):
 						pass
