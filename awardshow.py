@@ -3,6 +3,7 @@ import nltk, json
 with open('/Users/williamgross/337AwardShow/goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
 
+
 tweet_txt_array = []
 for tweet in tweets:
 	tweet_txt_array.append(tweet['text'])
@@ -35,6 +36,7 @@ def person_search(text):
 						entities.append(person)
 	return entities
 
+award_titles = ["Best Picture", "Best Actor in a Leading Role", "Best Actress in a Leading Role", "Best Actor in a Supporting Role", "Best Actress in a Supporting Role", "Best Animated Feature", "Best Cinematography", "Best Costume Design", "Best Director", "Best Documentary Feature", "Best Documentary Short", "Best Film Editing", "Best Foreign Language Film", "Best Makeup and Hairstyling", "Best Original Score", "Best Original Song", "Best Production Design", "Best Animated Short Film", "Best Live Action Short Film", "Best Sound Editing", "Best Sound Mixing", "Best Visual Effects", "Best Adapted Screenplay", "Best Original Screenplay"]
 def looped_search(tweets):
 	"Loops through tweets and exports people found in them as a list"
 	people = [];
