@@ -1,16 +1,26 @@
-Best Motion Picture 
-Best Director
-Best Actor 
-Best Actress 
-Best Supporting Actor
-Best Supporting Actress
-Best Screenplay
-Best Original Score
-Best Original Song
-Best Foreign Language Film
-Best Animated Feature Film 
-Best Drama Series
-Best Comedy Series
-Best Actor in a Television
-Best Actress in a Television
 hosted
+Best Television Series Actor - Drama
+Best Actress in a Motion Picture - Comedy or Musical
+Best Actor in a Television Series - Comedy or Musical
+Best Screenplay
+Best Supporting Actor in a Television Series
+Best Supporting Actress in a Motion Picture
+Best Actor in a Motion Picture - Drama
+Best Motion Picture - Drama
+Best Television Series - Drama
+Best Actor in a Motion Picture - Comedy or Musical
+Best Motion Picture - Comedy or Musical
+Best Foreign Film
+Best Supporting Actor in a Motion Picture
+Best Actress in a Television Series - Drama
+Best Original Score
+Best Actor in a TV Movie or Miniseries
+Best Animated Feature Film
+Best Original Song
+Best Director
+Best Actress in a TV Movie or Miniseries
+Best Miniseries or Motion Picture Made for Television
+Best Supporting Actress in a TV Movie, Series, or Miniseries
+Best Actress in a Motion Picture - Drama
+Best Television Series - Comedy or Musical
+Best TV Series Actress - Comedy or Musical
