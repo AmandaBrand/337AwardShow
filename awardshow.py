@@ -24,7 +24,7 @@ def person_search(text):
 	names.extend(namecorpus.words('female.txt'))
 	sentences = sent_detector.tokenize(text)
 	entities = []
-	stoplist = ["Justin REALLY", "Clinton Endorses", "Quentin Tarantino"]
+	stoplist = ["Justin REALLY", "Clinton Endorses"]
 	for sentence in sentences:
 		temp = nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(sentence)))
 		for entity in temp:
@@ -81,7 +81,7 @@ def find_hosts(host_tweets):
 def main():
 	tweet_dict = make_tweet_dict()
 
-	hosts = find_hosts(tweet_dict['Hosts'])
+	hosts = find_hosts(tweet_dict['hosted'])
 
 	print hosts
 	return hosts
