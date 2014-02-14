@@ -79,6 +79,7 @@ def person_search(text):
 	return entities
 
 def find_winners():
+	print "--WINNERS--"
 	already_seen = [] #will hold hashes of tweets so we don't print the same tweet twice
 	cecil_award = []
 	for tweet in tweets:
@@ -109,7 +110,8 @@ def find_winners():
 						print temp_array[0] + "- "+temp_array[1]
 		if "Cecil" in tweet_text:
 			cecil_award.append(tweet_text)
-			print find_hosts(cecil_award)[0]
+	print "Cecil B. DeMille Award for Lifetime Achievement in Motion Pictures - " + find_hosts(cecil_award)[0]
+	print ""
 
 
 #makes a dictionary with buckets dictated in dict_buckets.txt
