@@ -1,12 +1,11 @@
 import nltk, json
+import namescraper
 
-with open('/Users/williamgross/337AwardShow/goldenglobes.json', 'r') as f:
+with open('goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
-
-
-tweet_txt_array = []
-for tweet in tweets:
-	tweet_txt_array.append(tweet['text'])
+# tweet_txt_array = []
+# for tweet in tweets:
+# 	tweet_txt_array.append(tweet['text'])
 
 ## Currently, I can only get the functions to work by copying these definitions into
 ## the command line and running them there 
@@ -36,12 +35,26 @@ def person_search(text):
 						entities.append(person)
 	return entities
 
-award_titles = ["Best Picture", "Best Actor in a Leading Role", "Best Actress in a Leading Role", "Best Actor in a Supporting Role", "Best Actress in a Supporting Role", "Best Animated Feature", "Best Cinematography", "Best Costume Design", "Best Director", "Best Documentary Feature", "Best Documentary Short", "Best Film Editing", "Best Foreign Language Film", "Best Makeup and Hairstyling", "Best Original Score", "Best Original Song", "Best Production Design", "Best Animated Short Film", "Best Live Action Short Film", "Best Sound Editing", "Best Sound Mixing", "Best Visual Effects", "Best Adapted Screenplay", "Best Original Screenplay"]
+
 def looped_search(tweets):
 	"Loops through tweets and exports people found in them as a list"
-	people = [];
+	award_names = namescraper.get_names()
+	#makes a list out of award names in awardnames.txt
+
+	# people = [];
+	tweets_dict = {}
 	for tweet in tweets:
-		temp = person_search(tweet['text'])
-		if temp!=[]:
-			people.extend(temp)
-	return people
+		for award in award_names:
+			tweet_text = tweet['text']
+			if award in tweet_text:
+				if award in tweets_dict.keys():
+					tweets_dict[award].append(tweet_text)
+				else:
+					#if a tweet for that award hasn't been stored yet, start the array
+					tweets_dict[award] = [tweet_text]
+
+		# temp = person_search(tweet['text'])
+		# if temp!=[]:
+		# 	people.extend(temp)
+	return tweets_dict
+	# return people
