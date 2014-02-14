@@ -1,10 +1,25 @@
-import nltk, json
+import nltk, json, re
 
 with open('goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
 # tweet_txt_array = []
 # for tweet in tweets:
 # 	tweet_txt_array.append(tweet['text'])
+
+def clean(tweet):
+	tweet = tweet.replace("RT @goldenglobes: ","")
+	tweet = tweet.replace("- #GoldenG","").replace("- #GoldenGlobes","").replace("lobes","")
+	tweet =  re.sub(r'\(@.+\)', "", tweet)
+	tweet =  re.sub(r'#.+', "", tweet)
+	tweet =  re.sub(r'\"$', "", tweet)
+	tweet =  re.sub(r'http\:\/\/t\.co\/.+', "", tweet)
+	tweet =  re.sub(r'\/\/.+.+', "", tweet)
+	tweet =  re.sub(r'\".+\"', "", tweet)
+	tweet =  re.sub(r'-\s+-', "-", tweet)
+	tweet = tweet.replace("&amp;","and")
+
+	# tweet =  re.sub(r'.+', "", tweet)
+	return tweet
 
 def get_dict_buckets():
 	text_file = open("dict_buckets.txt", "r")
@@ -40,6 +55,36 @@ def person_search(text):
 					else:
 						entities.append(person)
 	return entities
+
+def find_winners():
+	already_seen = [] #will hold hashes of tweets so we don't print the same tweet twice
+
+	for tweet in tweets:
+		temp_array = [] #holds split tweet (i.e. ["Best Actor", "Russell Crowe", "Les Miserable"])
+		tweet_text = tweet["text"]
+
+		if "RT @goldenglobes: Best" in tweet_text:
+			tweet_text = clean(tweet_text)
+
+			if "RT" not in tweet_text and "+" not in tweet_text:##more cleaning
+
+				temp_array = tweet_text.split("-")#the tweets look like "Best Actor - Russell Crowe - Les Miserable"
+
+				if hash(tweet_text.lower().replace(" ","")) not in already_seen and "Best" == temp_array[0][:4]:
+				#first part, checking if we have seen it before
+				#second part is just cleaning out tweets that don't start with "Best"
+					already_seen.append(hash(tweet_text.lower().replace(" ","")))
+					length = len(temp_array)
+					#different formats of tweets based on how many "-" are included in the tweet
+					if length == 3:
+						#[award, winner, movie]
+						print temp_array[0] + "- "+temp_array[1] +"- " +temp_array[2]
+					if length == 4:
+						#[award, category, winer, movie ]
+						print temp_array[0]+ "- " +temp_array[1]+ "- "+temp_array[2] +"- "+temp_array[3]
+					if length == 2:
+						#[award, winner]
+						print temp_array[0] + "- "+temp_array[1]
 
 #makes a dictionary with buckets dictated in dict_buckets.txt
 def make_tweet_dict():
@@ -82,6 +127,7 @@ def main():
 	tweet_dict = make_tweet_dict()
 
 	hosts = find_hosts(tweet_dict['hosted'])
+	find_winners()
 
 	print hosts
 	return hosts
