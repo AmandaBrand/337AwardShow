@@ -29,6 +29,28 @@ def get_dict_buckets():
 		 buckets.append(line.rstrip())
 	return buckets
 
+def find_hosts(host_tweets):
+	name_array = []
+	count_array = []
+	for tweet in host_tweets:
+		people = person_search(tweet)
+		if len(people):
+			for person in people:
+				if person in name_array:
+					index = name_array.index(person)
+					count_array[index] = count_array[index] + 1
+				else:
+					name_array.append(person)
+					count_array.append(1)
+	##get top 2
+	sorted_counts = sorted(count_array)
+	most = sorted_counts[-1]
+	second_most = sorted_counts[-2]
+	most_index = count_array.index(most)
+	second_index = count_array.index(second_most)
+
+	return name_array[most_index], name_array[second_index]
+
 ## Currently, I can only get the functions to work by copying these definitions into
 ## the command line and running them there 
 def person_search(text):
@@ -58,7 +80,7 @@ def person_search(text):
 
 def find_winners():
 	already_seen = [] #will hold hashes of tweets so we don't print the same tweet twice
-
+	cecil_award = []
 	for tweet in tweets:
 		temp_array = [] #holds split tweet (i.e. ["Best Actor", "Russell Crowe", "Les Miserable"])
 		tweet_text = tweet["text"]
@@ -85,6 +107,10 @@ def find_winners():
 					if length == 2:
 						#[award, winner]
 						print temp_array[0] + "- "+temp_array[1]
+		if "Cecil" in tweet_text:
+			cecil_award.append(tweet_text)
+			print find_hosts(cecil_award)[0]
+
 
 #makes a dictionary with buckets dictated in dict_buckets.txt
 def make_tweet_dict():
