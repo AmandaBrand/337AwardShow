@@ -1,4 +1,4 @@
-import nltk, json
+import nltk, json, re
 
 with open('goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
@@ -8,6 +8,16 @@ with open('goldenglobes.json', 'r') as f:
 def clean(tweet):
 	tweet = tweet.replace("RT @goldenglobes: ","")
 	tweet = tweet.replace("- #GoldenG","").replace("- #GoldenGlobes","").replace("lobes","")
+	tweet =  re.sub(r'\(@.+\)', "", tweet)
+	tweet =  re.sub(r'#.+', "", tweet)
+	tweet =  re.sub(r'\"$', "", tweet)
+	tweet =  re.sub(r'http\:\/\/t\.co\/.+', "", tweet)
+	tweet =  re.sub(r'\/\/.+.+', "", tweet)
+	tweet =  re.sub(r'\".+\"', "", tweet)
+	tweet =  re.sub(r'-\s+-', "-", tweet)
+	tweet = tweet.replace("&amp;","and")
+
+	# tweet =  re.sub(r'.+', "", tweet)
 	return tweet
 def loop():
 	already_seen = [] #will hold hashes of tweets so we don't print the same tweet twice
@@ -19,27 +29,25 @@ def loop():
 		if "RT @goldenglobes: Best" in tweet_text:
 			tweet_text = clean(tweet_text)
 
-			if "RT" not in tweet_text:##more cleaning
+			if "RT" not in tweet_text and "+" not in tweet_text:##more cleaning
 
 				temp_array = tweet_text.split("-")#the tweets look like "Best Actor - Russell Crowe - Les Miserable"
 
-				if hash(tweet_text) not in already_seen and "Best" == temp_array[0][:4]:
+				if hash(tweet_text.lower().replace(" ","")) not in already_seen and "Best" == temp_array[0][:4]:
 				#first part, checking if we have seen it before
 				#second part is just cleaning out tweets that don't start with "Best"
-
-					already_seen.append(hash(tweet_text))
+					already_seen.append(hash(tweet_text.lower().replace(" ","")))
 					length = len(temp_array)
 					#different formats of tweets based on how many "-" are included in the tweet
 					if length == 3:
 						#[award, winner, movie]
-						print temp_array[1] + "wins " +temp_array[0] + "in " +temp_array[2]
+						print temp_array[0] + "- "+temp_array[1] +"- " +temp_array[2]
 					if length == 4:
 						#[award, category, winer, movie ]
-						print temp_array[2]+"wins "+temp_array[0]+ "-" +temp_array[1]+ "in "+temp_array[3]
+						print temp_array[0]+ "- " +temp_array[1]+ "- "+temp_array[2] +"- "+temp_array[3]
 					if length == 2:
 						#[award, winner]
-						print temp_array[1] + "wins "+temp_array[0]
-					print ""
+						print temp_array[0] + "- "+temp_array[1]
 
 loop()
 
