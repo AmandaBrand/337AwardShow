@@ -1,10 +1,29 @@
-import nltk, json, re
+import nltk, json, re, numpy
 
 with open('goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
 # tweet_txt_array = []
 # for tweet in tweets:
 # 	tweet_txt_array.append(tweet['text'])
+award_mapping = {'Best Drama': 'Best Motion Picture - Drama',
+	'Best TV Drama': 'Best Television Series - Drama',
+	'Animated': 'Best Animated Feature Film',
+	'Best Supporting Actor': 'Best Supporting Actor in a Motion Picture',
+	'Best Director': 'Best Director',
+	'Best Original Song': 'Best Original Song',
+	'Best Original Score': 'Best Original Score',
+	'Best Screenplay': 'Best Screenplay',
+	'Best Supporting Actress in a Motion Picture': 'Best Supporting Actress in a Motion Picture',
+	'Best Actor': 'Best Actor in a Motion Picture - Drama',
+	'TV actor': 'Best Actor in a TV Movie or Miniseries',
+	'foreign': 'Best Foreign Film',
+	'TV actress': 'Best Actress in a TV Movie or Miniseries',
+	'miniseries': 'Best Miniseries or Motion Picture Made for Television',
+	'Best Actress Drama': 'Best Actress in a Motion Picture - Drama',
+	'TV comedy': 'Best Television Series - Comedy or Musical',
+	'musical or comedy': 'Best Motion Picture - Comedy or Musical',
+	'actor in a comedy': 'Best Actor in a Motion Picture - Comedy or Musical',
+	'actress in a comedy': 'Best Actress in a Motion Picture - Comedy or Musical'}
 
 def clean(tweet):
 	tweet = tweet.replace("RT @goldenglobes: ","")
@@ -21,8 +40,8 @@ def clean(tweet):
 	# tweet =  re.sub(r'.+', "", tweet)
 	return tweet
 
-def get_dict_buckets():
-	text_file = open("dict_buckets.txt", "r")
+def get_dict_buckets(filename):
+	text_file = open(filename, "r")
 	lines = text_file.readlines()
 	buckets = []
 	for line in lines:
@@ -114,9 +133,9 @@ def find_winners():
 	print ""
 
 
-#makes a dictionary with buckets dictated in dict_buckets.txt
-def make_tweet_dict():
-	dict_buckets = get_dict_buckets()
+#makes a dictionary with buckets dictated in filename
+def make_tweet_dict(filename):
+	dict_buckets = get_dict_buckets(filename)
 	tweets_dict = {}
 	for tweet in tweets:
 		for bucket in dict_buckets:
@@ -130,34 +149,49 @@ def make_tweet_dict():
 	return tweets_dict
 
 def find_hosts(host_tweets):
-	name_array = []
-	count_array = []
+	name_array = numpy.array([])
+	count_array = numpy.array([])
 	for tweet in host_tweets:
 		people = person_search(tweet)
 		if len(people):
 			for person in people:
 				if person in name_array:
-					index = name_array.index(person)
-					count_array[index] = count_array[index] + 1
+					index = numpy.where(name_array==person)[0][0]
+					count_array[index] += 1
 				else:
-					name_array.append(person)
-					count_array.append(1)
+					name_array = numpy.append(name_array,person)
+					count_array = numpy.append(count_array,1)
+	sorting = count_array.argsort()
+	sorting = sorting[::-1]
+	sorted_name_array = name_array[sorting]
 	##get top 2
-	sorted_counts = sorted(count_array)
-	most = sorted_counts[-1]
-	second_most = sorted_counts[-2]
-	most_index = count_array.index(most)
-	second_index = count_array.index(second_most)
+#	sorted_counts = sorted(count_array)
+#	most = sorted_counts[-1]
+#	second_most = sorted_counts[-2]
+#	most_index = count_array.index(most)
+#	second_index = count_array.index(second_most)
 
-	return name_array[most_index], name_array[second_index]
+	#return name_array[most_index], name_array[second_index]
+	return sorted_name_array
 
+def find_nominees():
+	tweet_dict = make_tweet_dict("dict_nominees.txt")
+	awards = get_dict_buckets("dict_nominees.txt")
+	people={}
+	for award in awards:
+		people[award] = find_hosts(tweet_dict[award])
+	print "--NOMINEES--"
+	for award in people.keys():
+		p = people[award]
+		print "For " + award_mapping[award] + ": " + p[0] + ", " + p[1] + ", " + p[2] + ", " + p[3]
+	return
+	
 def main():
-	tweet_dict = make_tweet_dict()
-
+	tweet_dict = make_tweet_dict("dict_buckets.txt")
 	hosts = find_hosts(tweet_dict['hosted'])
+	print "--HOSTS--"
+	print hosts[0] + " and " + hosts[1]
+	find_nominees()
 	find_winners()
-
-	print hosts
-	return hosts
-	# return people
+	return
 main()
