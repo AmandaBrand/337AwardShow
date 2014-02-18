@@ -48,7 +48,7 @@ def get_dict_buckets(filename):
 		 buckets.append(line.rstrip())
 	return buckets
 
-def find_hosts(host_tweets):
+def find_most_popular(host_tweets):
 	name_array = []
 	count_array = []
 	for tweet in host_tweets:
@@ -129,7 +129,7 @@ def find_winners():
 						print temp_array[0] + "- "+temp_array[1]
 		if "Cecil" in tweet_text:
 			cecil_award.append(tweet_text)
-	print "Cecil B. DeMille Award for Lifetime Achievement in Motion Pictures - " + find_hosts(cecil_award)[0]
+	print "Cecil B. DeMille Award for Lifetime Achievement in Motion Pictures - " + find_most_popular(cecil_award)[0]
 	print ""
 
 
@@ -148,10 +148,16 @@ def make_tweet_dict(filename):
 					tweets_dict[bucket] = [tweet_text]
 	return tweets_dict
 
-def find_hosts(host_tweets):
+def find_hosts():
+	tweet_dict = make_tweet_dict("dict_buckets.txt")
+	print "--HOSTS--"
+	hosts = find_most_popular(tweet_dict['hosted'])
+	print hosts[0] + " and " + hosts[1]
+
+def find_most_popular(tweet_pool):
 	name_array = numpy.array([])
 	count_array = numpy.array([])
-	for tweet in host_tweets:
+	for tweet in tweet_pool:
 		people = person_search(tweet)
 		if len(people):
 			for person in people:
@@ -164,14 +170,7 @@ def find_hosts(host_tweets):
 	sorting = count_array.argsort()
 	sorting = sorting[::-1]
 	sorted_name_array = name_array[sorting]
-	##get top 2
-#	sorted_counts = sorted(count_array)
-#	most = sorted_counts[-1]
-#	second_most = sorted_counts[-2]
-#	most_index = count_array.index(most)
-#	second_index = count_array.index(second_most)
 
-	#return name_array[most_index], name_array[second_index]
 	return sorted_name_array
 
 def find_nominees():
@@ -179,7 +178,7 @@ def find_nominees():
 	awards = get_dict_buckets("dict_nominees.txt")
 	people={}
 	for award in awards:
-		people[award] = find_hosts(tweet_dict[award])
+		people[award] = find_most_popular(tweet_dict[award])
 	print "--NOMINEES--"
 	for award in people.keys():
 		p = people[award]
@@ -187,11 +186,8 @@ def find_nominees():
 	return
 	
 def main():
-	tweet_dict = make_tweet_dict("dict_buckets.txt")
-	hosts = find_hosts(tweet_dict['hosted'])
-	print "--HOSTS--"
-	print hosts[0] + " and " + hosts[1]
+	find_hosts()
 	find_nominees()
 	find_winners()
 	return
-main()
+# main()
