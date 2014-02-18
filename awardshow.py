@@ -2,6 +2,7 @@ import nltk, json, re, numpy
 
 with open('goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
+winners = []
 # tweet_txt_array = []
 # for tweet in tweets:
 # 	tweet_txt_array.append(tweet['text'])
@@ -121,12 +122,16 @@ def find_winners():
 					if length == 3:
 						#[award, winner, movie]
 						print temp_array[0] + "- "+temp_array[1] +"- " +temp_array[2]
+						winner = temp_array[1]
 					if length == 4:
 						#[award, category, winer, movie ]
 						print temp_array[0]+ "- " +temp_array[1]+ "- "+temp_array[2] +"- "+temp_array[3]
+						winner = temp_array[2]
 					if length == 2:
 						#[award, winner]
 						print temp_array[0] + "- "+temp_array[1]
+						winner = temp_array[1]
+					winners.append(winner.lower().replace(" ",""))
 		if "Cecil" in tweet_text:
 			cecil_award.append(tweet_text)
 	print "Cecil B. DeMille Award for Lifetime Achievement in Motion Pictures - " + find_most_popular(cecil_award)[0]
@@ -154,6 +159,7 @@ def find_hosts():
 	hosts = find_most_popular(tweet_dict['hosted'])
 	print hosts[0] + " and " + hosts[1]
 
+#TODO: make this faster.
 def find_most_popular(tweet_pool):
 	name_array = numpy.array([])
 	count_array = numpy.array([])
@@ -184,10 +190,21 @@ def find_nominees():
 		p = people[award]
 		print "For " + award_mapping[award] + ": " + p[0] + ", " + p[1] + ", " + p[2] + ", " + p[3]
 	return
-	
+
+def find_presenters():
+	presenters = []
+	for tweet in tweets:
+		if "presenting" in tweet["text"].lower():
+			presenters.append(tweet["text"])
+	print "--PRESENTERS--"
+	people = find_most_popular(presenters)
+	for person in people:
+		if person.lower().replace(" ","") not in  winners: 
+			print person
+
 def main():
 	find_hosts()
-	find_nominees()
 	find_winners()
-	return
-# main()
+	find_nominees()
+	find_presenters()
+main()
