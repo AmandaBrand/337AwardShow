@@ -48,7 +48,11 @@ award_mapping_pres = {'Best Score award': 'Best Original Score',
 	'are the first presenters': 'Best Supporting Actress in a Motion Picture',
 	'que tem um chiclete na boca': 'Best Actor in a TV Movie or Miniseries',
 	'presentan el premio a Mejor Miniserie': 'Best Miniseries or Motion Picture Made for Television',
-	'Nadie se le acerca': 'Best Actor in a Motion Picture - Comedy or Musical'}
+	'Nadie se le acerca': 'Best Actor in a Motion Picture - Comedy or Musical',
+	'present the Best Score award': 'Best Original Song',
+	'presentando el premio a Mejor Actor en una pelicula dramatica': 'Best Actor in a Motion Picture - Drama',
+	'Mejor Actor de Serie Dram': 'Best Television Series Actor - Drama',
+	}
 	
 def clean(tweet):
 	tweet = tweet.replace("RT @goldenglobes: ","")
@@ -82,6 +86,7 @@ def person_search(text):
 	names = namecorpus.words('male.txt')
 	names.extend(namecorpus.words('female.txt'))
 	names.append('Halle')
+	names.append('Salma')
 	sentences = sent_detector.tokenize(text)
 	entities = []
 	stoplist = ["Justin REALLY", "Clinton Endorses"]
@@ -256,5 +261,5 @@ def main():
 	find_hosts()
 	find_winners()
 	find_presenters()
-	#find_nominees()
+	find_nominees()
 main()

@@ -5,6 +5,7 @@ que tem um chiclete na boca
 presentan el premio a Mejor Miniserie
 Nadie se le acerca
 Best Score award
+present the Best Score award
 Best Actress Comedy or Musical
 Best Actress in a Motion Picture, Drama
 best animated film
@@ -20,3 +21,5 @@ Best Supporting Actor in a Motion Picture
 presents Best Motion Picture, Drama
 announced Best TV Drama
 best foreign film
+presentando el premio a Mejor Actor en una pelicula dramatica
+Mejor Actor de Serie Dram
