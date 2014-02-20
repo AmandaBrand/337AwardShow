@@ -3,6 +3,7 @@ import nltk, json, re, numpy
 with open('goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
 winners = []
+hosts_lower = []
 # tweet_txt_array = []
 # for tweet in tweets:
 # 	tweet_txt_array.append(tweet['text'])
@@ -26,6 +27,29 @@ award_mapping = {'Best Drama': 'Best Motion Picture - Drama',
 	'actor in a comedy': 'Best Actor in a Motion Picture - Comedy or Musical',
 	'actress in a comedy': 'Best Actress in a Motion Picture - Comedy or Musical'}
 
+award_mapping_pres = {'Best Score award': 'Best Original Score',
+	'Best Actress Comedy or Musical': 'Best Actress in a Motion Picture - Comedy or Musical',
+	'Best Actress in a Motion Picture, Drama': 'Best Actress in a Motion Picture - Drama',
+	'best animated film': 'Best Animated Feature Film',
+	'best TV series comedy or musical': 'Best Television Series - Comedy or Musical',
+	'Best Actress in a TV Comedy': 'Best TV Series Actress - Comedy or Musical',
+	'Best Screenplay - Motion Picture': 'Best Screenplay',
+	'best supporting actress in a series, mini-series or tv movie': 'Best Supporting Actress in a TV Movie, Series, or Miniseries',
+	'Cecil B. DeMille lifetime achievement award': 'Cecil B. DeMille Award for Lifetime Achievement in Motion Pictures',
+	'presenting Best Director': 'Best Director',
+	'Best Motion Picture Comedy or Musical': 'Best Motion Picture - Comedy or Musical',
+	'Best Actress in a TV Series - Drama': 'Best Actress in a Television Series - Drama',
+	'Best Supporting Actor in a Motion Picture': 'Best Supporting Actor in a Motion Picture',
+	'presents Best Motion Picture, Drama': 'Best Motion Picture - Drama',
+	'announced Best TV Drama': 'Best Television Series - Drama',
+	'best foreign film': 'Best Foreign Film',
+	'presetan al MEJOR ACTOR EN UNA SERIE DE TV MINISERIE O PELI PARA TV': 'Best Supporting Actor in a Television Series',
+	'she has to stand on stage with': 'Best Actor in a Television Series - Comedy or Musical',
+	'are the first presenters': 'Best Supporting Actress in a Motion Picture',
+	'que tem um chiclete na boca': 'Best Actor in a TV Movie or Miniseries',
+	'presentan el premio a Mejor Miniserie': 'Best Miniseries or Motion Picture Made for Television',
+	'Nadie se le acerca': 'Best Actor in a Motion Picture - Comedy or Musical'}
+	
 def clean(tweet):
 	tweet = tweet.replace("RT @goldenglobes: ","")
 	tweet = tweet.replace("- #GoldenG","").replace("- #GoldenGlobes","").replace("lobes","")
@@ -49,28 +73,6 @@ def get_dict_buckets(filename):
 		 buckets.append(line.rstrip())
 	return buckets
 
-def find_most_popular(host_tweets):
-	name_array = []
-	count_array = []
-	for tweet in host_tweets:
-		people = person_search(tweet)
-		if len(people):
-			for person in people:
-				if person in name_array:
-					index = name_array.index(person)
-					count_array[index] = count_array[index] + 1
-				else:
-					name_array.append(person)
-					count_array.append(1)
-	##get top 2
-	sorted_counts = sorted(count_array)
-	most = sorted_counts[-1]
-	second_most = sorted_counts[-2]
-	most_index = count_array.index(most)
-	second_index = count_array.index(second_most)
-
-	return name_array[most_index], name_array[second_index]
-
 ## Currently, I can only get the functions to work by copying these definitions into
 ## the command line and running them there 
 def person_search(text):
@@ -79,22 +81,35 @@ def person_search(text):
 	namecorpus = nltk.corpus.names
 	names = namecorpus.words('male.txt')
 	names.extend(namecorpus.words('female.txt'))
+	names.append('Halle')
 	sentences = sent_detector.tokenize(text)
 	entities = []
 	stoplist = ["Justin REALLY", "Clinton Endorses"]
 	for sentence in sentences:
 		temp = nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(sentence)))
+		i = 0
 		for entity in temp:
+			i +=1
 			try:
 				nodeLabel = entity.node;
 			except AttributeError:
 				pass
 			else:
-				if (nodeLabel=='PERSON' and len(entity)==2 and entity[0][0] in names):
+				if (len(entity)==2 and entity[0][0] in names):
 					person = entity[0][0]+" "+entity[1][0]
 					if (person in stoplist):
 						pass
 					else:
+						entities.append(person)
+				elif (nodeLabel=='PERSON' and len(entity)==1 and entity[0][0] in names):
+					try:
+						nextNodeLabel = temp[i].node
+					except AttributeError:
+						pass
+					except IndexError:
+						pass
+					else:
+						person = entity[0][0]+" "+temp[i][0][0]
 						entities.append(person)
 	return entities
 
@@ -131,10 +146,14 @@ def find_winners():
 						#[award, winner]
 						print temp_array[0] + "- "+temp_array[1]
 						winner = temp_array[1]
-					winners.append(winner.lower().replace(" ",""))
+					for winner in temp_array[1::]:
+						if winner not in winners:
+							winners.append(winner.lower().replace(" ",""))
 		if "Cecil" in tweet_text:
 			cecil_award.append(tweet_text)
-	print "Cecil B. DeMille Award for Lifetime Achievement in Motion Pictures - " + find_most_popular(cecil_award)[0]
+	cecil_winner = find_most_popular(cecil_award)[0]
+	print "Cecil B. DeMille Award for Lifetime Achievement in Motion Pictures - " + cecil_winner
+	winners.append(cecil_winner.lower().replace(" ",""))
 	print ""
 
 
@@ -157,7 +176,11 @@ def find_hosts():
 	tweet_dict = make_tweet_dict("dict_buckets.txt")
 	print "--HOSTS--"
 	hosts = find_most_popular(tweet_dict['hosted'])
-	print hosts[0] + " and " + hosts[1]
+	host0 = hosts[0]
+	host1 = hosts[1]
+	hosts_lower.append(host0.lower().replace(" ",""))
+	hosts_lower.append(host1.lower().replace(" ",""))
+	print host0 + " and " + host1
 
 #TODO: make this faster.
 def find_most_popular(tweet_pool):
@@ -192,19 +215,46 @@ def find_nominees():
 	return
 
 def find_presenters():
+	tweet_dict = make_tweet_dict("dict_presenters.txt")
+	awards = get_dict_buckets("dict_presenters.txt")
+	presenters = {}
+	stop_list = winners + hosts_lower
+	stop_list.append('alberteinstein')
+	stop_list.append('carriemathison')
+	stop_list.append('lovechristoph')
+	print "--PRESENTERS--"
+	for award in awards:
+		presenters[award] = find_most_popular(tweet_dict[award])
+	for award in presenters.keys():
+		pres_string = award_mapping_pres[award] + ": "
+		for person in presenters[award]:
+			if person.lower().replace(" ","") not in stop_list:
+				pres_string+=person + " "
+		print pres_string
+	return
+	
+def find_presenter_list():
 	presenters = []
+	not_winners = []
 	for tweet in tweets:
 		if "presenting" in tweet["text"].lower():
 			presenters.append(tweet["text"])
-	print "--PRESENTERS--"
+	#print "--PRESENTERS--"
 	people = find_most_popular(presenters)
 	for person in people:
 		if person.lower().replace(" ","") not in  winners: 
-			print person
+			not_winners.append(person)
+	return not_winners
+
+def print_tweets(string):
+	for tweet in tweets:
+		if string in tweet['text']:
+			print tweet['text']
+	return
 
 def main():
 	find_hosts()
 	find_winners()
-	find_nominees()
 	find_presenters()
+	#find_nominees()
 main()
