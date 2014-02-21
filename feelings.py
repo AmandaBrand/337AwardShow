@@ -3,7 +3,6 @@ import csv
 import pprint
 import nltk
 import nltk.classify
-from nltk.corpus import stopwords
 
 
 # clean up the tweets
@@ -60,17 +59,6 @@ def getFeatures(tweet, sw):
     return featureVector    
 
 
-"""with open('neg_features.txt', 'r') as f:
-    for line in f:
-        word_features.append(line.strip())
-
-with open('pos_features.txt', 'r') as g:
-    for line in g:
-        word_features.append(line.strip())"""
-
-#print word_features  
-
-
 def extractFeatures(tweet):
     tweet_words = set(tweet)
     features = {}
@@ -115,14 +103,25 @@ apply features to classifier to train it. using NLTK and NaiveBayesClassifier
 
 training_set = nltk.classify.util.apply_features(extractFeatures, tweets)
 
-classifier = nltk.NaiveBayesClassifier.train(training_set)
-
 
 """
 now we can test the sentiment analysis
 """
 
-test = 'My soul died just a little'
-sentiment = classifier.classify(extractFeatures(test.split()))
-print "Test Tweet = %s\n" % (test)
-print "Sentiment = %s\n" % (sentiment)
+
+def classify(tweet):
+    classifier = nltk.NaiveBayesClassifier.train(training_set)
+    sentiment = classifier.classify(extractFeatures(cleanup(tweet.split()))
+    return sentiment
+
+
+
+# test = 'My soul died just a little'
+
+# print "Test Tweet = %s\n" % (test)
+# print "Sentiment = %s\n" % (sentiment)
+
+# test2 = 'I\'m at a loss for words'
+# sentiment = classifier.classify(extractFeatures(test2.split()))
+# print "Test Tweet = %s\n" % (test2)
+# print "Sentiment = %s\n" % (sentiment)
