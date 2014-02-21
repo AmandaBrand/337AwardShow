@@ -2,8 +2,10 @@ import nltk, json, re, numpy
 
 with open('goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
-winners = []
+winners_lower = []
 hosts_lower = []
+presenters_lower = []
+random_lower = ["oscarsnub", "lewisbest", "jessicachas", "lesmiz", "christophwatlz", "lesmis", "lewislincoln", "ben*boston", "sarapalin", "jobanne", "benafleck"]
 # tweet_txt_array = []
 # for tweet in tweets:
 # 	tweet_txt_array.append(tweet['text'])
@@ -152,13 +154,13 @@ def find_winners():
 						print temp_array[0] + "- "+temp_array[1]
 						winner = temp_array[1]
 					for winner in temp_array[1::]:
-						if winner not in winners:
-							winners.append(winner.lower().replace(" ",""))
+						if winner not in winners_lower:
+							winners_lower.append(winner.lower().replace(" ",""))
 		if "Cecil" in tweet_text:
 			cecil_award.append(tweet_text)
-	cecil_winner = find_most_popular(cecil_award)[0]
+	cecil_winner = find_most_popular(cecil_award[:30])[0]
 	print "Cecil B. DeMille Award for Lifetime Achievement in Motion Pictures - " + cecil_winner
-	winners.append(cecil_winner.lower().replace(" ",""))
+	winners_lower.append(cecil_winner.lower().replace(" ",""))
 	print ""
 
 
@@ -180,7 +182,7 @@ def make_tweet_dict(filename):
 def find_hosts():
 	tweet_dict = make_tweet_dict("dict_buckets.txt")
 	print "--HOSTS--"
-	hosts = find_most_popular(tweet_dict['hosted'])
+	hosts = find_most_popular(tweet_dict['hosted'][:50])
 	host0 = hosts[0]
 	host1 = hosts[1]
 	hosts_lower.append(host0.lower().replace(" ",""))
@@ -188,19 +190,20 @@ def find_hosts():
 	print host0 + " and " + host1
 
 #TODO: make this faster.
-def find_most_popular(tweet_pool):
+def find_most_popular(tweet_pool, stoplist = []):
 	name_array = numpy.array([])
 	count_array = numpy.array([])
 	for tweet in tweet_pool:
 		people = person_search(tweet)
 		if len(people):
 			for person in people:
-				if person in name_array:
-					index = numpy.where(name_array==person)[0][0]
-					count_array[index] += 1
-				else:
-					name_array = numpy.append(name_array,person)
-					count_array = numpy.append(count_array,1)
+				if person.lower().replace(" ","") not in stoplist:
+					if person in name_array:
+						index = numpy.where(name_array==person)[0][0]
+						count_array[index] += 1
+					else:
+						name_array = numpy.append(name_array,person)
+						count_array = numpy.append(count_array,1)
 	sorting = count_array.argsort()
 	sorting = sorting[::-1]
 	sorted_name_array = name_array[sorting]
@@ -211,30 +214,38 @@ def find_nominees():
 	tweet_dict = make_tweet_dict("dict_nominees.txt")
 	awards = get_dict_buckets("dict_nominees.txt")
 	people={}
+	stoplist = winners_lower + hosts_lower + presenters_lower + random_lower
 	for award in awards:
-		people[award] = find_most_popular(tweet_dict[award])
+		people[award] = find_most_popular(tweet_dict[award], stoplist)
 	print "--NOMINEES--"
 	for award in people.keys():
 		p = people[award]
-		print "For " + award_mapping[award] + ": " + p[0] + ", " + p[1] + ", " + p[2] + ", " + p[3]
+		print "For " + award_mapping[award] + ": ",
+		lim = 0
+		for p1 in p:
+			lim = lim +1
+			print p1 + " ",
+			if lim == 3:
+				break
+		print ""
 	return
 
 def find_presenters():
 	tweet_dict = make_tweet_dict("dict_presenters.txt")
 	awards = get_dict_buckets("dict_presenters.txt")
 	presenters = {}
-	stop_list = winners + hosts_lower
+	stop_list = winners_lower + hosts_lower
 	stop_list.append('alberteinstein')
 	stop_list.append('carriemathison')
 	stop_list.append('lovechristoph')
 	print "--PRESENTERS--"
 	for award in awards:
-		presenters[award] = find_most_popular(tweet_dict[award])
+		presenters[award] = find_most_popular(tweet_dict[award], stop_list)
 	for award in presenters.keys():
 		pres_string = award_mapping_pres[award] + ": "
 		for person in presenters[award]:
-			if person.lower().replace(" ","") not in stop_list:
-				pres_string+=person + " "
+			presenters_lower.append(person.lower().replace(" ",""))
+			pres_string+=person + " "
 		print pres_string
 	return
 	
@@ -249,6 +260,7 @@ def find_presenter_list():
 	for person in people:
 		if person.lower().replace(" ","") not in  winners: 
 			not_winners.append(person)
+
 	return not_winners
 
 def print_tweets(string):
@@ -262,4 +274,4 @@ def main():
 	find_winners()
 	find_presenters()
 	find_nominees()
-main()
+# main()
