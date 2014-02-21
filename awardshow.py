@@ -1,4 +1,4 @@
-import nltk, json, re, numpy
+import nltk, json, re, numpy, feelings
 
 with open('goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
@@ -180,14 +180,15 @@ def make_tweet_dict(filename):
 	return tweets_dict
 
 def find_hosts():
-	tweet_dict = make_tweet_dict("dict_buckets.txt")
 	print "--HOSTS--"
-	hosts = find_most_popular(tweet_dict['hosted'][:50])
+	host_tweet_dict = make_tweet_dict("dict_hosts.txt")
+	hosts = find_most_popular(host_tweet_dict['hosted'][0:50])
 	host0 = hosts[0]
 	host1 = hosts[1]
 	hosts_lower.append(host0.lower().replace(" ",""))
 	hosts_lower.append(host1.lower().replace(" ",""))
 	print host0 + " and " + host1
+
 
 #TODO: make this faster.
 def find_most_popular(tweet_pool, stoplist = []):
@@ -244,11 +245,29 @@ def find_presenters():
 	for award in presenters.keys():
 		pres_string = award_mapping_pres[award] + ": "
 		for person in presenters[award]:
-			presenters_lower.append(person.lower().replace(" ",""))
-			pres_string+=person + " "
+			if person.lower().replace(" ","") not in stop_list:
+				pres_string+=person + " "
+				sentiment_output(sentimental_tweets(person))
 		print pres_string
 	return
-	
+
+def sentimental_tweets(string):
+	sent_dict = {'positive': [], 'negative': []}
+	list = find_tweets(string)
+	for tweet in list:
+		sentiment = feelings.classify_tweet(tweet)
+		sent_dict[sentiment].append(tweet)
+	return sent_dict
+
+def sentiment_output(dict):
+	ratio = float(len(dict['positive']))/(float(len(dict['negative']))+float(len(dict['positive'])))
+	ratio = round(ratio*100)
+	if (ratio > 50):
+		print str(ratio) + "% Positive" + dict['positive'][0]
+	else:
+		print str(ratio) + "% Positive: " + dict['negative'][0]
+	return
+
 def find_presenter_list():
 	presenters = []
 	not_winners = []
