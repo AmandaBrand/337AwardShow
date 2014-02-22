@@ -2,6 +2,7 @@ import nltk, json, re, numpy, feelings
 
 with open('goldenglobes.json', 'r') as f:
      tweets = map(json.loads, f)
+
 winners_lower = []
 hosts_lower = []
 presenters_lower = []
@@ -58,7 +59,7 @@ award_mapping_pres = {'Best Score award': 'Best Original Score',
 	
 def clean(tweet):
 	tweet = tweet.replace("RT @goldenglobes: ","")
-	#tweet = tweet.replace("- #GoldenG","").replace("- #GoldenGlobes","").replace("lobes","")
+	tweet = tweet.replace("- #GoldenG","").replace("- #GoldenGlobes","").replace("lobes","")
 	tweet =  re.sub(r'\(@.+\)', "", tweet)
 	tweet =  re.sub(r'#.+', "", tweet)
 	tweet =  re.sub(r'\"$', "", tweet)
@@ -67,7 +68,6 @@ def clean(tweet):
 	tweet =  re.sub(r'\".+\"', "", tweet)
 	tweet =  re.sub(r'-\s+-', "-", tweet)
 	tweet = tweet.replace("&amp;","and")
-
 
 	# tweet =  re.sub(r'.+', "", tweet)
 	return tweet
@@ -290,17 +290,11 @@ def print_tweets(string):
 			print tweet['text']
 	return
 
-<<<<<<< HEAD
-# def main():
-# 	#find_hosts()
-# 	#find_winners()
-# 	#find_presenters()
-# 	#find_nominees()
-=======
+
 def main():
 	find_hosts()
 	find_winners()
 	find_presenters()
 	find_nominees()
->>>>>>> cc6390b03348d6c563afb0b69e5303aa41568203
+
 # main()

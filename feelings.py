@@ -1,38 +1,24 @@
-import re
-import csv
-import pprint
-import nltk
-import nltk.classify
+import pprint, re, csv, nltk, nltk.classify
 
 
-# clean up the tweets
 def cleanup(tweet):
-    # lower case
     tweet = tweet.lower()
-    # URLs
-    tweet = re.sub(r'^https?:\/\/.*[\r\n]*', '', tweet)
-    # usernames
-    tweet = re.sub('@[^\s]+', 'USERNAME', tweet)
-    # white spaces
+    tweet = re.sub(r'http\:\/\/t\.co\/.+', "", tweet)
+    tweet = re.sub(r'\(@.+\)', 'USERNAME', tweet)
     tweet = re.sub('[\s]+', ' ', tweet)
-    # hastags
     tweet = re.sub(r'#([^\s]+)', r'\1', tweet)
-    #trim
     tweet = tweet.strip('\'"')
-    
     return tweet
 
 
-# remove repeats
 def repeat(x):
     pattern = re.compile(r"(.)\1{1,}", re.DOTALL) 
     return pattern.sub(r"\1\1", x)
 
 
-# get stopwords
-def stopWords(filename):
+def stopWords():
     swlist = []
-    f = open(filename, 'r')
+    f = open('stopwords.txt', 'r')
     line = f.readline()
     while line:
         word = line.strip()
@@ -46,18 +32,13 @@ def getFeatures(tweet, sw):
     featureVector = []  
     words = tweet.split()
     for w in words:
-        #replace two or more with two occurrences 
         w = repeat(w) 
-        #strip punctuation
         w = w.strip('\'"?,.')
-        #check if it consists of only words
         val = re.search(r"^[a-zA-Z][a-zA-Z0-9]*[a-zA-Z]+[a-zA-Z0-9]*$", w)
-        #ignore if it is a stopWord
         if (w in sw or val is None):
             continue
         else:
             featureVector.append(w.lower())
-    #print featureVector
     return featureVector    
 
 
@@ -66,13 +47,8 @@ def extractFeatures(tweet):
     features = {}
     for word in word_features:
         features['contains(%s)' % word] = (word in tweet_words)
-    #print features
     return features
 
-
-#==================================================
-#==================================================
-#==================================================
 
 
 """
@@ -84,7 +60,7 @@ and tagging each set of words from the tweets with their sentiment (tuples)
 tweetlist = csv.reader(open('tweets.csv', 'rb'), delimiter=',', quotechar='|')
 pos_f = csv.reader(open('pos_features.csv', 'rU'), delimiter=',', quotechar='|')
 neg_f = csv.reader(open('neg_features.csv', 'rU'), delimiter=',', quotechar='|')
-stoppers = stopWords('stopwords.txt')
+stoppers = stopWords()
 word_features = []
 tweets = []
 
@@ -96,16 +72,14 @@ for row in tweetlist:
     words = getFeatures(cleantweet, stoppers)
     word_features.extend(words)
     tweets.append((words_filtered , sentiment))
-    #print tweets
 
 # add in other features to help train the classifier
 for i in pos_f and neg_f:
     sentiment = i[0]
     feat = i[1]
     tweets.append(([feat], sentiment))
-    #print tweets
 
-#print tweets
+
 """
 apply features to classifier to train it. using NLTK and NaiveBayesClassifier
 """
@@ -114,29 +88,27 @@ apply features to classifier to train it. using NLTK and NaiveBayesClassifier
 training_set = nltk.classify.util.apply_features(extractFeatures, tweets)
 
 classifier = nltk.NaiveBayesClassifier.train(training_set)
+
+
 """
-now we can test the sentinment analysis
+test the sentiment analyzer
 """
 
 
-<<<<<<< HEAD
 classifier = nltk.NaiveBayesClassifier.train(training_set)
 
-def classify(tweet):
-=======
 def classify_tweet(tweet):
->>>>>>> cc6390b03348d6c563afb0b69e5303aa41568203
     sentiment = classifier.classify(extractFeatures(cleanup(tweet).split()))
     return sentiment
 
 
 
 # test = 'My soul died just a little'
-
+# sentiment = classifier.classify(extractFeatures(cleanup(test).split()))
 # print "Test Tweet = %s\n" % (test)
 # print "Sentiment = %s\n" % (sentiment)
 
 # test2 = 'I\'m at a loss for words'
-# sentiment = classifier.classify(extractFeatures(test2.split()))
+# sentiment = classifier.classify(extractFeatures(cleanup(test2).split()))
 # print "Test Tweet = %s\n" % (test2)
 # print "Sentiment = %s\n" % (sentiment)
