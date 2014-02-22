@@ -56,7 +56,7 @@ award_mapping_pres = {'Best Score award': 'Best Original Score',
 	
 def clean(tweet):
 	tweet = tweet.replace("RT @goldenglobes: ","")
-	tweet = tweet.replace("- #GoldenG","").replace("- #GoldenGlobes","").replace("lobes","")
+	#tweet = tweet.replace("- #GoldenG","").replace("- #GoldenGlobes","").replace("lobes","")
 	tweet =  re.sub(r'\(@.+\)', "", tweet)
 	tweet =  re.sub(r'#.+', "", tweet)
 	tweet =  re.sub(r'\"$', "", tweet)
@@ -65,6 +65,7 @@ def clean(tweet):
 	tweet =  re.sub(r'\".+\"', "", tweet)
 	tweet =  re.sub(r'-\s+-', "-", tweet)
 	tweet = tweet.replace("&amp;","and")
+
 
 	# tweet =  re.sub(r'.+', "", tweet)
 	return tweet
@@ -185,6 +186,7 @@ def find_hosts():
 	host1 = hosts[1]
 	hosts_lower.append(host0.lower().replace(" ",""))
 	hosts_lower.append(host1.lower().replace(" ",""))
+	print tweet_dict
 	print host0 + " and " + host1
 
 #TODO: make this faster.
@@ -257,9 +259,9 @@ def print_tweets(string):
 			print tweet['text']
 	return
 
-def main():
-	find_hosts()
-	find_winners()
-	find_presenters()
-	find_nominees()
-main()
+# def main():
+# 	#find_hosts()
+# 	#find_winners()
+# 	#find_presenters()
+# 	#find_nominees()
+# main()

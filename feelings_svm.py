@@ -1,8 +1,5 @@
-import re
-import csv
-import pprint
-import nltk
-import nltk.classify
+import re, csv, pprint, nltk, nltk.classify, svm
+from svmutil import * 
 
 
 # clean up the tweets
@@ -19,7 +16,6 @@ def cleanup(tweet):
     tweet = re.sub(r'#([^\s]+)', r'\1', tweet)
     #trim
     tweet = tweet.strip('\'"')
-    
     return tweet
 
 
@@ -115,15 +111,15 @@ training_set = nltk.classify.util.apply_features(extractFeatures, tweets)
 
 
 """
-now we can test the sentinment analysis
+now we can test the sentinment analysis - using Support Vector Machines
 """
 
 
-classifier = nltk.NaiveBayesClassifier.train(training_set)
+# classifier = nltk.NaiveBayesClassifier.train(training_set)
 
-def classify(tweet):
-    sentiment = classifier.classify(extractFeatures(cleanup(tweet).split()))
-    return sentiment
+# def classify(tweet):
+#     sentiment = classifier.classify(extractFeatures(cleanup(tweet).split()))
+#     return sentiment
 
 
 
@@ -136,3 +132,53 @@ def classify(tweet):
 # sentiment = classifier.classify(extractFeatures(test2.split()))
 # print "Test Tweet = %s\n" % (test2)
 # print "Sentiment = %s\n" % (sentiment)
+
+def getSVMFeatureVectorAndLabels(tweets, featureList):
+    sortedFeatures = sorted(featureList)
+    map = {}
+    feature_vector = []
+    labels = []
+    for t in tweets:
+        label = 0
+        map = {}
+        #Initialize empty map
+        for w in sortedFeatures:
+            map[w] = 0
+        
+        tweet_words = t[0]
+        tweet_opinion = t[1]
+        #Fill the map
+        for word in tweet_words:
+            #process the word (remove repetitions and punctuations)
+            word = replaceTwoOrMore(word) 
+            word = word.strip('\'"?,.')
+            #set map[word] to 1 if word exists
+            if word in map:
+                map[word] = 1
+        #end for loop
+        values = map.values()
+        feature_vector.append(values)
+        if(tweet_opinion == 'positive'):
+            label = 0
+        elif(tweet_opinion == 'negative'):
+            label = 1
+        elif(tweet_opinion == 'neutral'):
+            label = 2
+        labels.append(label)            
+    #return the list of feature_vector and labels
+    return {'feature_vector' : feature_vector, 'labels': labels}
+#end
+ 
+#Train the classifier
+result = getSVMFeatureVectorandLabels(tweets, featureList)
+problem = svm_problem(result['labels'], result['feature_vector'])
+#'-q' option suppress console output
+param = svm_parameter('-q')
+param.kernel_type = LINEAR
+classifier = svm_train(problem, param)
+svm_save_model(classifierDumpFile, classifier)
+ 
+#Test the classifier
+test_feature_vector = getSVMFeatureVector(test_tweets, featureList)
+#p_labels contains the final labeling result
+p_labels, p_accs, p_vals = svm_predict([0] * len(test_feature_vector),test_feature_vector, classifier)
