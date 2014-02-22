@@ -113,15 +113,19 @@ apply features to classifier to train it. using NLTK and NaiveBayesClassifier
 
 training_set = nltk.classify.util.apply_features(extractFeatures, tweets)
 
-
+classifier = nltk.NaiveBayesClassifier.train(training_set)
 """
 now we can test the sentinment analysis
 """
 
 
+<<<<<<< HEAD
 classifier = nltk.NaiveBayesClassifier.train(training_set)
 
 def classify(tweet):
+=======
+def classify_tweet(tweet):
+>>>>>>> cc6390b03348d6c563afb0b69e5303aa41568203
     sentiment = classifier.classify(extractFeatures(cleanup(tweet).split()))
     return sentiment
 
