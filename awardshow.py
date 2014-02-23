@@ -264,7 +264,7 @@ def sentiment_output(dict):
 	ratio = float(len(dict['positive']))/(float(len(dict['negative']))+float(len(dict['positive'])))
 	ratio = round(ratio*100)
 	if (ratio > 50):
-		print str(ratio) + "% Positive" + dict['positive'][0]
+		print str(ratio) + "% Positive: " + dict['positive'][0]
 	else:
 		print str(ratio) + "% Positive: " + dict['negative'][0]
 	return
