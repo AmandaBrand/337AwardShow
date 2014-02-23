@@ -47,8 +47,9 @@ def extractFeatures(tweet):
     features = {}
     for word in word_features:
         features['contains(%s)' % word] = (word in tweet_words)
+    #print features
     return features
-
+    
 
 
 """
@@ -58,8 +59,8 @@ and tagging each set of words from the tweets with their sentiment (tuples)
 """
 
 tweetlist = csv.reader(open('tweets.csv', 'rb'), delimiter=',', quotechar='|')
-pos_f = csv.reader(open('pos_features.csv', 'rU'), delimiter=',', quotechar='|')
-neg_f = csv.reader(open('neg_features.csv', 'rU'), delimiter=',', quotechar='|')
+# pos_f = csv.reader(open('pos_features.csv', 'rU'), delimiter=',', quotechar='|')
+# neg_f = csv.reader(open('neg_features.csv', 'rU'), delimiter=',', quotechar='|')
 stoppers = stopWords()
 word_features = []
 tweets = []
@@ -74,10 +75,19 @@ for row in tweetlist:
     tweets.append((words_filtered , sentiment))
 
 # add in other features to help train the classifier
-for i in pos_f and neg_f:
-    sentiment = i[0]
-    feat = i[1]
-    tweets.append(([feat], sentiment))
+# for i in pos_f:
+#     sentiment = i[0]
+#     feat = i[1]
+#     word_features.append(feat)
+#     tweets.append((feat, sentiment))
+
+# for i in neg_f:
+#     sentiment = i[0]
+#     feat = i[1]
+#     word_features.append(feat)
+#     tweets.append((feat, sentiment))
+
+#print word_features
 
 
 """
@@ -86,7 +96,6 @@ apply features to classifier to train it. using NLTK and NaiveBayesClassifier
 
 
 training_set = nltk.classify.util.apply_features(extractFeatures, tweets)
-
 classifier = nltk.NaiveBayesClassifier.train(training_set)
 
 
