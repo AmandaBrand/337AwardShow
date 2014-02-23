@@ -188,7 +188,6 @@ def find_hosts():
 	host1 = hosts[1]
 	hosts_lower.append(host0.lower().replace(" ",""))
 	hosts_lower.append(host1.lower().replace(" ",""))
-	print tweet_dict
 	print host0 + " and " + host1
 
 
@@ -284,11 +283,14 @@ def find_presenter_list():
 
 	return not_winners
 
-def print_tweets(string):
+def find_tweets(string):
+	out = []
 	for tweet in tweets:
 		if string in tweet['text']:
-			print tweet['text']
-	return
+			out.append(tweet['text'])
+	if len(out) > 50:
+		out = out[0:49]
+	return out
 
 
 def main():
@@ -297,4 +299,4 @@ def main():
 	find_presenters()
 	find_nominees()
 
-# main()
+main()
