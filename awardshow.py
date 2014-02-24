@@ -216,7 +216,10 @@ def find_nominees():
 	tweet_dict = make_tweet_dict("dict_nominees.txt")
 	awards = get_dict_buckets("dict_nominees.txt")
 	people={}
-	stoplist = winners_lower + hosts_lower + presenters_lower + random_lower
+	stoplist = hosts_lower + presenters_lower + random_lower
+	for award in awards:
+		if len(tweet_dict[award]) > 80:
+			tweet_dict[award] = tweet_dict[award][0:79]
 	for award in awards:
 		people[award] = find_most_popular(tweet_dict[award], stoplist)
 	print "--NOMINEES--"
@@ -250,6 +253,7 @@ def find_presenters():
 				pres_string+=person + " "
 				sentiment_output(sentimental_tweets(person))
 		print pres_string
+		print ""
 	return
 
 def sentimental_tweets(string):
